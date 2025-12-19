@@ -1,0 +1,30 @@
+Estructura de obra viva:
+================================
+
+├── .gitignore
+├── README.md
+├── eslint.config.js
+├── index.html
+├── obra-viva-fe.txt
+├── package-lock.json
+├── package.json
+├── /public
+│   ├── vite.svg
+├── /src
+│   ├── App.css
+│   ├── App.tsx
+│   ├── /assets
+│   │   ├── react.svg
+│   ├── /components
+│   ├── /hooks
+│   ├── index.css
+│   ├── main.tsx
+│   ├── /mocks
+│   ├── /pages
+│   ├── /routes
+│   ├── /services
+│   ├── /types
+├── tsconfig.app.json
+├── tsconfig.json
+├── tsconfig.node.json
+├── vite.config.ts
