@@ -1,26 +1,19 @@
 //src/routes/ProtectedRoute.tsx
 
-import { Navigate, Route, Routes } from "react-router-dom";
-import LoginPage from "../pages/LoginPage";
-import DashboardPage from "../pages/DashboardPage";
-import ProtectedRoute from "./ProtectedRoute";
+import { Navigate } from "react-router-dom";
+import { tokenStorage } from "../services/tokenStorage";
+import type { ReactNode } from "react";
 
-export default function AppRouter() {
-  return (
-    <Routes>
-      <Route path="/login" element={<LoginPage />} />
+type ProtectedRouteProps = {
+  children: ReactNode;
+};
 
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <DashboardPage />
-          </ProtectedRoute>
-        }
-      />
+export default function ProtectedRoute({ children }: ProtectedRouteProps) {
+  const token = tokenStorage.getAccess();
 
-      <Route path="/" element={<Navigate to="/login" replace />} />
-      <Route path="*" element={<Navigate to="/login" replace />} />
-    </Routes>
-  );
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
 }
