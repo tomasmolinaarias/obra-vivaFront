@@ -1,4 +1,4 @@
-//src/routes/AppRouter.tsx
+//src/routes/ProtectedRoute.tsx
 
 import { Navigate, Route, Routes } from "react-router-dom";
 import LoginPage from "../pages/LoginPage";

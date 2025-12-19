@@ -1,13 +1,13 @@
 //src/services/auth.service.ts
-
-import type { LoginRequest, LoginResponse } from "../types/auth";
-import { apiPost } from "./apiClient";
+import { apiPostJson } from "./apiClient";
 import { tokenStorage } from "./tokenStorage";
 
-export async function login(req: LoginRequest): Promise<LoginResponse> {
-  // Endpoint según tu doc: /api/v1/auth/login/
-  const data = await apiPost<LoginResponse>("/v1/auth/login/", req);
+export type LoginRequest = { email: string; password: string };
+export type LoginResponse = { access: string; refresh: string };
 
+export async function login(req: LoginRequest): Promise<LoginResponse> {
+  // POST /api/v1/auth/login/
+  const data = await apiPostJson<LoginResponse, LoginRequest>("/v1/auth/login/", req);
   tokenStorage.setTokens(data.access, data.refresh);
   return data;
 }

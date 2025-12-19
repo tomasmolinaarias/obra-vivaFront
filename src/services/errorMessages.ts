@@ -1,3 +1,4 @@
+//src/services/errorMessages.ts
 export function mapAuthError(message: string): string {
   const normalized = message.toLowerCase();
 

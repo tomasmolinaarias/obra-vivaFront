@@ -1,14 +1,10 @@
 //src/services/apiClient.ts
 
+import { tokenStorage } from "./tokenStorage";
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
-type ApiError = {
-  message: string;
-  status?: number;
-  payload?: unknown;
-};
-
-async function safeJson(res: Response): Promise<any | null> {
+async function safeJson(res: Response) {
   try {
     return await res.json();
   } catch {
@@ -16,59 +12,148 @@ async function safeJson(res: Response): Promise<any | null> {
   }
 }
 
-function extractErrorMessage(payload: any, fallback: string) {
-  // Maneja formatos comunes (DRF / validaciones / detail)
-  if (!payload) return fallback;
+async function refreshAccessToken(): Promise<string> {
+  const refresh = tokenStorage.getRefresh();
+  if (!refresh) throw new Error("NO_REFRESH_TOKEN");
 
-  if (typeof payload === "string") return payload;
-  if (payload.detail && typeof payload.detail === "string") return payload.detail;
+  const body = new URLSearchParams();
+  body.set("refresh", refresh);
 
-  // Soporta payload tipo { email: { errors:[...] } } o { field: ["..."] }
-  const candidates: string[] = [];
+  const res = await fetch(`${API_BASE_URL}/v1/auth/refresh/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body,
+  });
 
-  for (const key of Object.keys(payload)) {
-    const v = payload[key];
-
-    if (Array.isArray(v)) {
-      for (const item of v) if (typeof item === "string") candidates.push(`${key}: ${item}`);
-    } else if (v && typeof v === "object") {
-      if (Array.isArray(v.errors)) {
-        for (const item of v.errors) if (typeof item === "string") candidates.push(`${key}: ${item}`);
-      } else if (typeof v.value === "string" && Array.isArray(v.errors) && v.errors.length) {
-        for (const item of v.errors) candidates.push(`${key}: ${item}`);
-      }
-    }
+  if (!res.ok) {
+    tokenStorage.clear();
+    throw new Error("REFRESH_FAILED");
   }
 
-  return candidates.length ? candidates.join(" · ") : fallback;
+  const data = (await safeJson(res)) as { access: string } | null;
+  if (!data?.access) throw new Error("REFRESH_INVALID_RESPONSE");
+
+  tokenStorage.setAccess(data.access);
+  return data.access;
 }
 
-export async function apiPost<TResponse>(
-  path: string,
-  body: unknown,
-  init?: RequestInit
-): Promise<TResponse> {
+export async function apiGet<T>(path: string): Promise<T> {
+  const access = tokenStorage.getAccess();
+
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    headers: {
+      ...(access ? { Authorization: `Bearer ${access}` } : {}),
+    },
+  });
+
+  if (res.status === 401) {
+    // intenta refresh y reintenta una vez
+    const newAccess = await refreshAccessToken();
+
+    const retry = await fetch(`${API_BASE_URL}${path}`, {
+      headers: { Authorization: `Bearer ${newAccess}` },
+    });
+
+    if (!retry.ok) {
+      const payload = await safeJson(retry);
+      throw new Error(payload?.detail || `Error ${retry.status}`);
+    }
+
+    return (await safeJson(retry)) as T;
+  }
+
+  if (!res.ok) {
+    const payload = await safeJson(res);
+    throw new Error(payload?.detail || `Error ${res.status}`);
+  }
+
+  return (await safeJson(res)) as T;
+}
+
+export async function apiPostJson<TResponse, TBody>(path: string, body: TBody): Promise<TResponse> {
+  const access = tokenStorage.getAccess();
+
   const res = await fetch(`${API_BASE_URL}${path}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...(init?.headers || {}),
+      ...(access ? { Authorization: `Bearer ${access}` } : {}),
     },
     body: JSON.stringify(body),
-    ...init,
   });
+
+  if (res.status === 401) {
+    const newAccess = await refreshAccessToken();
+
+    const retry = await fetch(`${API_BASE_URL}${path}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${newAccess}`,
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!retry.ok) {
+      const payload = await safeJson(retry);
+      throw new Error(payload?.detail || `Error ${retry.status}`);
+    }
+
+    return (await safeJson(retry)) as TResponse;
+  }
 
   if (!res.ok) {
     const payload = await safeJson(res);
-    const message = extractErrorMessage(
-      payload,
-      res.status === 401 ? "Credenciales inválidas." : `Error ${res.status}.`
-    );
-
-    const err: ApiError = { message, status: res.status, payload };
-    throw err;
+    throw new Error(payload?.detail || `Error ${res.status}`);
   }
 
-  const data = (await safeJson(res)) as TResponse;
-  return data;
+  return (await safeJson(res)) as TResponse;
 }
+export async function apiPostForm<TResponse>(
+  path: string,
+  body: Record<string, string | number | undefined | null>
+): Promise<TResponse> {
+  const access = tokenStorage.getAccess();
+
+  const form = new URLSearchParams();
+  for (const [k, v] of Object.entries(body)) {
+    if (v !== undefined && v !== null) form.set(k, String(v));
+  }
+
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      ...(access ? { Authorization: `Bearer ${access}` } : {}),
+    },
+    body: form,
+  });
+
+  if (res.status === 401) {
+    const newAccess = await refreshAccessToken();
+
+    const retry = await fetch(`${API_BASE_URL}${path}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: `Bearer ${newAccess}`,
+      },
+      body: form,
+    });
+
+    if (!retry.ok) {
+      const payload = await safeJson(retry);
+      throw new Error(payload?.detail || `Error ${retry.status}`);
+    }
+
+    return (await safeJson(retry)) as TResponse;
+  }
+
+  if (!res.ok) {
+    const payload = await safeJson(res);
+    throw new Error(payload?.detail || `Error ${res.status}`);
+  }
+
+  return (await safeJson(res)) as TResponse;
+}
+
