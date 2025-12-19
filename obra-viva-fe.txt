@@ -3,6 +3,13 @@ Estructura de obra viva:
 
 ├── .gitignore
 ├── README.md
+├── components.json
+├── /dist
+│   ├── /assets
+│   │   ├── index-C8JUxqj0.css
+│   │   ├── index-R7xK4qRv.js
+│   ├── index.html
+│   ├── vite.svg
 ├── eslint.config.js
 ├── index.html
 ├── obra-viva-fe.txt
@@ -16,14 +23,42 @@ Estructura de obra viva:
 │   ├── /assets
 │   │   ├── react.svg
 │   ├── /components
+│   │   ├── /ui
+│   │   │   ├── alert.tsx
+│   │   │   ├── badge.tsx
+│   │   │   ├── button.tsx
+│   │   │   ├── card.tsx
+│   │   │   ├── dialog.tsx
+│   │   │   ├── input.tsx
+│   │   │   ├── label.tsx
+│   │   │   ├── separator.tsx
+│   │   │   ├── skeleton.tsx
+│   │   │   ├── textarea.tsx
 │   ├── /hooks
+│   │   ├── useApi.ts
 │   ├── index.css
+│   ├── /lib
+│   │   ├── utils.ts
 │   ├── main.tsx
 │   ├── /mocks
 │   ├── /pages
+│   │   ├── DashboardPage.tsx
+│   │   ├── LoginPage.tsx
 │   ├── /routes
+│   │   ├── AppRouter.tsx
+│   │   ├── ProtectedRoute.tsx
 │   ├── /services
+│   │   ├── apiClient.ts
+│   │   ├── auth.service.ts
+│   │   ├── documents.service.ts
+│   │   ├── errorMessages.ts
+│   │   ├── fetcher.ts
+│   │   ├── me.service.ts
+│   │   ├── projects.service.ts
+│   │   ├── tokenStorage.ts
 │   ├── /types
+│   │   ├── api.ts
+│   │   ├── auth.ts
 ├── tsconfig.app.json
 ├── tsconfig.json
 ├── tsconfig.node.json
