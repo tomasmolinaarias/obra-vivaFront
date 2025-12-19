@@ -1,50 +1,149 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import useSWRMutation from "swr/mutation";
+
+import { login } from "../services/auth.service";
+import { mapAuthError } from "../services/errorMessages";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+
+type LoginArgs = {
+  email: string;
+  password: string;
+};
+
+async function loginMutation(
+  _key: string,
+  { arg }: { arg: LoginArgs }
+) {
+  return login(arg);
+}
 
 export default function LoginPage() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("admin@example.com");
+  const [password, setPassword] = useState("Admin1234");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const { trigger, isMutating } = useSWRMutation(
+    "auth/login",
+    loginMutation
+  );
+
+  const canSubmit = useMemo(() => {
+    return (
+      email.trim().length > 0 &&
+      password.trim().length > 0 &&
+      !isMutating
+    );
+  }, [email, password, isMutating]);
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setErrorMsg(null);
+
+    try {
+      await trigger({
+        email: email.trim(),
+        password,
+      });
+
+      window.location.href = "/dashboard";
+    } catch (err: any) {
+      const rawMessage =
+        typeof err?.message === "string"
+          ? err.message
+          : "AUTH_INVALID";
+
+      setErrorMsg(mapAuthError(rawMessage));
+    }
+  }
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
-      <section className="w-full max-w-sm rounded-2xl bg-white p-6 shadow">
-        <h1 className="text-2xl font-semibold">Obra Viva</h1>
-        <p className="mt-1 text-slate-600">Acceso (mock por ahora)</p>
+      <Card className="w-full max-w-sm">
+        <CardHeader>
+          <CardTitle>Obra Viva</CardTitle>
+          <CardDescription>
+            Acceso a la plataforma
+          </CardDescription>
+        </CardHeader>
 
-        <div className="mt-6 space-y-3">
-          <div>
-            <label className="text-sm text-slate-700">Usuario</label>
-            <input
-              className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 outline-none focus:ring-2 focus:ring-slate-300"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="usuario"
-            />
-          </div>
+        <CardContent>
+          {errorMsg && (
+            <Alert
+              variant="destructive"
+              className="mb-4"
+            >
+              <AlertDescription>
+                {errorMsg}
+              </AlertDescription>
+            </Alert>
+          )}
 
-          <div>
-            <label className="text-sm text-slate-700">Contraseña</label>
-            <input
-              type="password"
-              className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 outline-none focus:ring-2 focus:ring-slate-300"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-            />
-          </div>
-
-          <button
-            className="mt-2 w-full rounded-xl bg-slate-900 px-4 py-2 text-white hover:opacity-90 disabled:opacity-50"
-            disabled={!username || !password}
-            onClick={() => {
-              // temporal: luego esto se reemplaza por auth.service.ts
-              localStorage.setItem("accessToken", "mock-token");
-              window.location.href = "/dashboard";
-            }}
+          <form
+            className="space-y-4"
+            onSubmit={onSubmit}
           >
-            Entrar
-          </button>
-        </div>
-      </section>
+            <div className="space-y-2">
+              <Label htmlFor="email">
+                Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) =>
+                  setEmail(e.target.value)
+                }
+                placeholder="admin@example.com"
+                autoComplete="email"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password">
+                Contraseña
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) =>
+                  setPassword(e.target.value)
+                }
+                placeholder="••••••••"
+                autoComplete="current-password"
+              />
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={!canSubmit}
+            >
+              {isMutating
+                ? "Ingresando..."
+                : "Entrar"}
+            </Button>
+
+            <p className="text-xs text-muted-foreground">
+              Endpoint:{" "}
+              <span className="font-mono">
+                /api/v1/auth/login/
+              </span>
+            </p>
+          </form>
+        </CardContent>
+      </Card>
     </main>
   );
 }

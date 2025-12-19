@@ -1,16 +1,20 @@
+//src/pages/DashboardPage.tsx
+
+import { logout } from "../services/auth.service";
+
 export default function DashboardPage() {
   return (
     <main className="min-h-screen bg-slate-50 p-4">
       <header className="mb-4 flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold">Dashboard</h1>
-          <p className="text-slate-600">Cumplimiento general (mock)</p>
+          <p className="text-slate-600">Cumplimiento general</p>
         </div>
 
         <button
           className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm hover:bg-slate-50"
           onClick={() => {
-            localStorage.removeItem("accessToken");
+            logout();
             window.location.href = "/login";
           }}
         >
