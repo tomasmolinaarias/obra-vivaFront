@@ -1,6 +1,8 @@
-//src/services/projects.service.ts
-import type { Project } from "../types/api";
+// src/services/projects.service.ts
+import type { Project } from "@/types/api";
 import { apiGet, apiPostForm } from "./apiClient";
+import { runtimeFlags } from "./runtimeFlags";
+import { mockCreateProject } from "@/mocks/mockApi";
 
 export type CreateProjectBody = {
   name: string;
@@ -14,5 +16,9 @@ export function listProjects() {
 }
 
 export function createProject(body: CreateProjectBody) {
+  if (runtimeFlags.useMocks) {
+    return mockCreateProject(body);
+  }
+
   return apiPostForm<Project>("/v1/projects/", body);
 }
