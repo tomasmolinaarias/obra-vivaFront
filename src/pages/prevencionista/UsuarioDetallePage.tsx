@@ -21,11 +21,16 @@ import {
     ClipboardCheck,
     Calendar,
     PenTool,
+    Briefcase,
+    LogOut,
+    PencilLine,
 } from "lucide-react";
 import { tokenStorage } from "@/services/tokenStorage";
 import type { User as AuthUser } from "@/types/auth";
+import { useNavigate } from "react-router-dom";
 
 export default function UsuarioDetallePage() {
+    const navigate = useNavigate();
     const [authUser] = useState<AuthUser | null>(() => tokenStorage.getUser());
 
     const worker = useMemo(() => {
@@ -46,14 +51,24 @@ export default function UsuarioDetallePage() {
             ? "Colaborador"
             : authUser?.role ?? "Maestro Primera";
 
+        const functionLabel = authUser?.role === "PREVENCIONISTA"
+            ? "Prevencionista HSE"
+            : "Especialista de Obra";
+
         return {
             name: fullName,
             role: roleLabel,
             company: "Constructora Las Peñas (Subcontrato)",
             status: authUser ? "Activo" : "Permanente",
             avatar: safeInitials,
+            functionName: functionLabel,
         };
     }, [authUser]);
+
+    const handleLogout = () => {
+        tokenStorage.clear();
+        navigate("/login");
+    };
 
     const documentation = [
         { title: "Ficha de Ingreso", status: "completed" },
@@ -93,6 +108,9 @@ export default function UsuarioDetallePage() {
                             <span className="flex items-center gap-1">
                                 <HardHat className="h-4 w-4" /> {worker.role}
                             </span>
+                            <span className="flex items-center gap-1">
+                                <Briefcase className="h-4 w-4" /> {worker.functionName}
+                            </span>
                             <span className="hidden md:inline">•</span>
                             <span className="flex items-center gap-1">
                                 <Building2 className="h-4 w-4" /> {worker.company}
@@ -100,12 +118,19 @@ export default function UsuarioDetallePage() {
                         </div>
                     </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center justify-end gap-3">
                     <Badge variant="secondary" className="px-3 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200">
                         {worker.status}
                     </Badge>
-                    <Button>
-                        Editar Perfil
+                    <Button
+                        variant="ghost"
+                        onClick={handleLogout}
+                        className="flex items-center gap-2 border border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+                    >
+                        <LogOut className="h-4 w-4" /> Cerrar Sesión
+                    </Button>
+                    <Button className="flex items-center gap-2 bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow hover:from-sky-600 hover:to-blue-700">
+                        <PencilLine className="h-4 w-4" /> Editar Perfil
                     </Button>
                 </div>
             </div>

@@ -1,12 +1,15 @@
 // src/features/prevencionista/dashboard/DashboardPrevencionista.tsx
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { dashboardService } from "@/services/prevencionista/dashboard.service";
+import { tokenStorage } from "@/services/tokenStorage";
 import type { KpiDashboard, AlertaPrevencionista, EventoAgenda } from "@/types/prevencionista";
+import type { User as AuthUser } from "@/types/auth";
 import { 
   ShieldCheck, 
   Users, 
@@ -15,8 +18,13 @@ import {
   Calendar,
   HardHat,
   Clock,
-  CheckCircle2
+  CheckCircle2,
+  User,
+  Briefcase,
+  LogOut,
+  PencilLine
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 type LoadingState = "loading" | "success" | "error";
 
@@ -26,6 +34,44 @@ export default function DashboardPrevencionista() {
   const [agenda, setAgenda] = useState<EventoAgenda[]>([]);
   const [loadingState, setLoadingState] = useState<LoadingState>("loading");
   const [error, setError] = useState<string | null>(null);
+  const [authUser] = useState<AuthUser | null>(() => tokenStorage.getUser());
+  const navigate = useNavigate();
+
+  const profile = useMemo(() => {
+    const defaultInitials = "PR";
+    const initialsFromUser = authUser
+      ? `${authUser.first_name?.charAt(0) ?? ""}${authUser.last_name?.charAt(0) ?? ""}`.trim()
+      : "";
+
+    const safeInitials = initialsFromUser
+      ? initialsFromUser.toUpperCase()
+      : authUser?.email?.charAt(0).toUpperCase() ?? defaultInitials;
+
+    const fullName = authUser
+      ? `${authUser.first_name ?? ""} ${authUser.last_name ?? ""}`.trim() || authUser.email
+      : "Prevencionista Obra Viva";
+
+    const roleLabel = authUser?.role === "PREVENCIONISTA"
+      ? "Prevencionista"
+      : authUser?.role ?? "Supervisor";
+
+    const functionLabel = authUser?.role === "PREVENCIONISTA"
+      ? "Prevencionista HSE"
+      : "Coordinador de Seguridad";
+
+    return {
+      name: fullName,
+      initials: safeInitials,
+      role: roleLabel,
+      functionName: functionLabel,
+      status: authUser ? "Activo" : "Invitado",
+    };
+  }, [authUser]);
+
+  const handleLogout = () => {
+    tokenStorage.clear();
+    navigate("/login");
+  };
 
   const obraId = 1; // TODO: Obtener de contexto/ruta
 
@@ -66,6 +112,47 @@ export default function DashboardPrevencionista() {
 
   return (
     <div className="space-y-6">
+      <div className="flex flex-col gap-4 rounded-xl border bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-4">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-white bg-slate-100 text-slate-600 shadow-sm">
+            {profile.initials ? (
+              <span className="text-xl font-semibold">{profile.initials}</span>
+            ) : (
+              <User className="h-6 w-6" />
+            )}
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">{profile.name}</h1>
+            <div className="mt-2 flex flex-wrap gap-3 text-sm text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <HardHat className="h-4 w-4" /> {profile.role}
+              </span>
+              <span className="flex items-center gap-1">
+                <Briefcase className="h-4 w-4" /> {profile.functionName}
+              </span>
+              <span className="flex items-center gap-1">
+                <ShieldCheck className="h-4 w-4 text-green-600" /> {profile.status}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+          <Badge variant="secondary" className="px-3 py-1 bg-green-50 text-green-700 border-green-200">
+            Activo en obra
+          </Badge>
+          <Button
+            variant="ghost"
+            onClick={handleLogout}
+            className="flex items-center gap-2 border border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+          >
+            <LogOut className="h-4 w-4" /> Cerrar Sesión
+          </Button>
+          <Button className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow hover:from-emerald-600 hover:to-green-700">
+            <PencilLine className="h-4 w-4" /> Editar Perfil
+          </Button>
+        </div>
+      </div>
+
       {/* Header */}
       <div className="flex items-center gap-3">
         <ShieldCheck className="h-8 w-8 text-green-600" />
