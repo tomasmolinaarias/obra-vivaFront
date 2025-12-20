@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { RiskHeatmap } from "@/components/prevencionista/RiskHeatmap";
+import { RiskMeter } from "@/components/prevencionista/RiskMeter";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { dashboardService } from "@/services/prevencionista/dashboard.service";
@@ -45,6 +46,7 @@ export default function DashboardPrevencionista() {
 
   const [searchRut, setSearchRut] = useState("");
   const [showRiskMap, setShowRiskMap] = useState(false);
+  const [showRiskMeter, setShowRiskMeter] = useState(false);
   const navigate = useNavigate();
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -154,8 +156,14 @@ export default function DashboardPrevencionista() {
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:justify-end">
           <Button
+            onClick={() => setShowRiskMeter(true)}
+            className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white shadow-lg shadow-orange-500/30 border-none animate-in fade-in zoom-in duration-300"
+          >
+            ⚠️ Riesgómetro en Vivo
+          </Button>
+          <Button
             onClick={() => setShowRiskMap(true)}
-            className="bg-orange-600 hover:bg-orange-700 text-white border-orange-700 shadow-sm"
+            className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white shadow-lg shadow-amber-500/30 border-none"
           >
             🔥 Ver Mapa de Riesgos
           </Button>
@@ -213,6 +221,17 @@ export default function DashboardPrevencionista() {
           </DialogHeader>
           <div className="mt-4">
             <RiskHeatmap />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showRiskMeter} onOpenChange={setShowRiskMeter}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center">Monitor de Riesgo en Tiempo Real</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            <RiskMeter />
           </div>
         </DialogContent>
       </Dialog>
