@@ -57,7 +57,7 @@ export default function LoginPage() {
         password,
       });
 
-      window.location.href = "/dashboard";
+      window.location.href = "/prevencionista";
     } catch (err: any) {
       const rawMessage =
         typeof err?.message === "string"

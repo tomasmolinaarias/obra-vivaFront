@@ -34,6 +34,25 @@ Estructura de obra viva:
 │   │   │   ├── separator.tsx
 │   │   │   ├── skeleton.tsx
 │   │   │   ├── textarea.tsx
+│   ├── /features
+│   │   ├── /dashboard
+│   │   │   ├── DashboardHeader.tsx
+│   │   │   ├── DashboardKpis.tsx
+│   │   ├── /documents
+│   │   │   ├── CreateDocumentDialog.tsx
+│   │   │   ├── DocumentsSection.tsx
+│   │   │   ├── useDocuments.ts
+│   │   ├── /prevencionista
+│   │   │   ├── /dashboard
+│   │   │   │   ├── DashboardPrevencionista.tsx
+│   │   │   ├── /ingresos-vivo
+│   │   │   │   ├── IngresosEnVivo.tsx
+│   │   │   ├── /layout
+│   │   │   │   ├── PrevencionistaSidebar.tsx
+│   │   ├── /projects
+│   │   │   ├── CreateProjectDialog.tsx
+│   │   │   ├── ProjectsSection.tsx
+│   │   │   ├── useProjects.ts
 │   ├── /hooks
 │   │   ├── useApi.ts
 │   ├── index.css
@@ -41,9 +60,25 @@ Estructura de obra viva:
 │   │   ├── utils.ts
 │   ├── main.tsx
 │   ├── /mocks
+│   │   ├── mockApi.ts
+│   │   ├── mockDb.ts
 │   ├── /pages
 │   │   ├── DashboardPage.tsx
 │   │   ├── LoginPage.tsx
+│   │   ├── /prevencionista
+│   │   │   ├── AccidentesPage.tsx
+│   │   │   ├── AstPage.tsx
+│   │   │   ├── CarpetaHistoricaPage.tsx
+│   │   │   ├── CharlasPage.tsx
+│   │   │   ├── DashboardPrevencionista.tsx
+│   │   │   ├── DocumentosSeguridadPage.tsx
+│   │   │   ├── EmergenciaPage.tsx
+│   │   │   ├── EppPage.tsx
+│   │   │   ├── IngresosVivoPage.tsx
+│   │   │   ├── InspeccionesPage.tsx
+│   │   │   ├── ProtocolosPage.tsx
+│   │   │   ├── ReportesPage.tsx
+│   │   │   ├── TrabajadoresPage.tsx
 │   ├── /routes
 │   │   ├── AppRouter.tsx
 │   │   ├── ProtectedRoute.tsx
@@ -54,11 +89,30 @@ Estructura de obra viva:
 │   │   ├── errorMessages.ts
 │   │   ├── fetcher.ts
 │   │   ├── me.service.ts
+│   │   ├── /prevencionista
+│   │   │   ├── dashboard.service.ts
+│   │   │   ├── ingresos.service.ts
+│   │   │   ├── trabajadores.service.ts
 │   │   ├── projects.service.ts
+│   │   ├── runtimeFlags.ts
 │   │   ├── tokenStorage.ts
+│   ├── /shared
+│   │   ├── /alerts
+│   │   │   ├── notify.ts
+│   │   ├── /utils
+│   │   │   ├── formatDate.ts
 │   ├── /types
+│   │   ├── accidentes.ts
 │   │   ├── api.ts
+│   │   ├── ast-art.ts
 │   │   ├── auth.ts
+│   │   ├── charlas.ts
+│   │   ├── documentos-seguridad.ts
+│   │   ├── emergencia.ts
+│   │   ├── epp.ts
+│   │   ├── inspecciones.ts
+│   │   ├── prevencionista.ts
+│   │   ├── trabajador.ts
 ├── tsconfig.app.json
 ├── tsconfig.json
 ├── tsconfig.node.json

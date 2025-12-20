@@ -1,12 +1,9 @@
-//src/App.tsx
-
-import { BrowserRouter } from "react-router-dom";
+// src/App.tsx
 import AppRouter from "./routes/AppRouter";
+import "./App.css";
 
-export default function App() {
-  return (
-    <BrowserRouter>
-      <AppRouter />
-    </BrowserRouter>
-  );
+function App() {
+  return <AppRouter />;  // ← Sin BrowserRouter aquí
 }
+
+export default App;
