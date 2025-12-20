@@ -1,5 +1,5 @@
 // src/services/auth.service.ts
-import { apiPostForm } from "./apiClient";
+import { apiPostForm, apiPostJson } from "./apiClient";
 import { tokenStorage } from "./tokenStorage";
 import { runtimeFlags } from "./runtimeFlags";
 import { mockLogin } from "@/mocks/mockApi";
@@ -17,7 +17,7 @@ export type LoginResponse = {
 export async function login(req: LoginRequest): Promise<LoginResponse> {
   const data = runtimeFlags.useMocks
     ? await mockLogin(req.email, req.password)
-    : await apiPostForm<LoginResponse>("/v1/auth/login/", req);
+    : await apiPostJson<LoginResponse, LoginRequest>("/v1/auth/login/", req);
 
   tokenStorage.setTokens(data.access, data.refresh);
   return data;

@@ -17,6 +17,7 @@ import ProtocolosPage from "@/pages/prevencionista/ProtocolosPage";
 import EmergenciaPage from "@/pages/prevencionista/EmergenciaPage";
 import ReportesPage from "@/pages/prevencionista/ReportesPage";
 import IngresosEnVivo from "@/pages/prevencionista/IngresosVivoPage";
+import UsuarioDetallePage from "@/pages/prevencionista/UsuarioDetallePage";
 
 export default function AppRouter() {
   return (
@@ -30,6 +31,18 @@ export default function AppRouter() {
         element={
           <ProtectedRoute>
             <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* ============================================ */}
+      {/* VISTA DEL TRABAJADOR / USUARIO              */}
+      {/* ============================================ */}
+      <Route
+        path="/usuario"
+        element={
+          <ProtectedRoute>
+            <UsuarioDetallePage />
           </ProtectedRoute>
         }
       />
@@ -61,6 +74,7 @@ export default function AppRouter() {
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/prevencionista/carpeta-historica"
         element={
