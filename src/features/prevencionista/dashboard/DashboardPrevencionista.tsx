@@ -4,17 +4,20 @@ import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { RiskHeatmap } from "@/components/prevencionista/RiskHeatmap";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { dashboardService } from "@/services/prevencionista/dashboard.service";
 import { tokenStorage } from "@/services/tokenStorage";
 import type { KpiDashboard, AlertaPrevencionista, EventoAgenda } from "@/types/prevencionista";
 import type { User as AuthUser } from "@/types/auth";
-import { 
-  ShieldCheck, 
-  Users, 
-  AlertTriangle, 
-  ClipboardList, 
+import {
+  ShieldCheck,
+  Users,
+  AlertTriangle,
+  ClipboardList,
   Calendar,
   HardHat,
   Clock,
@@ -22,8 +25,10 @@ import {
   User,
   Briefcase,
   LogOut,
-  PencilLine
+  PencilLine,
+  Search
 } from "lucide-react";
+
 import { useNavigate } from "react-router-dom";
 
 type LoadingState = "loading" | "success" | "error";
@@ -35,7 +40,18 @@ export default function DashboardPrevencionista() {
   const [loadingState, setLoadingState] = useState<LoadingState>("loading");
   const [error, setError] = useState<string | null>(null);
   const [authUser] = useState<AuthUser | null>(() => tokenStorage.getUser());
+
+
+
+  const [searchRut, setSearchRut] = useState("");
+  const [showRiskMap, setShowRiskMap] = useState(false);
   const navigate = useNavigate();
+
+  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && searchRut.trim()) {
+      navigate(`/prevencionista/trabajador/${searchRut.trim()}`);
+    }
+  };
 
   const profile = useMemo(() => {
     const defaultInitials = "PR";
@@ -137,6 +153,12 @@ export default function DashboardPrevencionista() {
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+          <Button
+            onClick={() => setShowRiskMap(true)}
+            className="bg-orange-600 hover:bg-orange-700 text-white border-orange-700 shadow-sm"
+          >
+            🔥 Ver Mapa de Riesgos
+          </Button>
           <Badge variant="secondary" className="px-3 py-1 bg-green-50 text-green-700 border-green-200">
             Activo en obra
           </Badge>
@@ -154,11 +176,24 @@ export default function DashboardPrevencionista() {
       </div>
 
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <ShieldCheck className="h-8 w-8 text-green-600" />
-        <div>
-          <h1 className="text-2xl font-bold">Dashboard Prevencionista</h1>
-          <p className="text-muted-foreground">Resumen de seguridad de la obra</p>
+
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <ShieldCheck className="h-8 w-8 text-green-600" />
+          <div>
+            <h1 className="text-2xl font-bold">Dashboard Prevencionista</h1>
+            <p className="text-muted-foreground">Resumen de seguridad de la obra</p>
+          </div>
+        </div>
+        <div className="relative w-full sm:w-72">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar trabajador por RUT..."
+            className="pl-8"
+            value={searchRut}
+            onChange={(e) => setSearchRut(e.target.value)}
+            onKeyDown={handleSearch}
+          />
         </div>
       </div>
 
@@ -170,6 +205,17 @@ export default function DashboardPrevencionista() {
         <AlertasCard alertas={alertas} />
         <AgendaCard agenda={agenda} />
       </div>
+
+      <Dialog open={showRiskMap} onOpenChange={setShowRiskMap}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Mapa de Calor de Riesgos - Obra Las Peñas</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            <RiskHeatmap />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -184,11 +230,11 @@ function KpisGrid({ kpis }: { kpis: KpiDashboard }) {
     },
     {
       label: "Trabajadores activos",
-      value:  kpis.trabajadores_activos,
+      value: kpis.trabajadores_activos,
       icon: <Users className="h-5 w-5 text-blue-600" />,
     },
     {
-      label:  "Riesgos críticos",
+      label: "Riesgos críticos",
       value: kpis.riesgos_criticos_activos,
       icon: <AlertTriangle className="h-5 w-5 text-red-600" />,
       alert: kpis.riesgos_criticos_activos > 0,
@@ -214,7 +260,7 @@ function KpisGrid({ kpis }: { kpis: KpiDashboard }) {
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-      {kpiItems. map((item, idx) => (
+      {kpiItems.map((item, idx) => (
         <Card key={idx} className={item.alert ? "border-red-300 bg-red-50" : item.highlight ? "border-green-300 bg-green-50" : ""}>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -223,7 +269,7 @@ function KpisGrid({ kpis }: { kpis: KpiDashboard }) {
                 {item.value}
               </span>
             </div>
-            <p className="mt-2 text-xs text-muted-foreground">{item. label}</p>
+            <p className="mt-2 text-xs text-muted-foreground">{item.label}</p>
           </CardContent>
         </Card>
       ))}
@@ -232,7 +278,7 @@ function KpisGrid({ kpis }: { kpis: KpiDashboard }) {
 }
 
 function AlertasCard({ alertas }: { alertas: AlertaPrevencionista[] }) {
-  const nivelVariant:  Record<string, "destructive" | "default" | "secondary"> = {
+  const nivelVariant: Record<string, "destructive" | "default" | "secondary"> = {
     CRITICO: "destructive",
     ALTO: "destructive",
     MEDIO: "default",
@@ -287,11 +333,11 @@ function AgendaCard({ agenda }: { agenda: EventoAgenda[] }) {
         <CardDescription>Actividades programadas</CardDescription>
       </CardHeader>
       <CardContent>
-        {agenda. length === 0 ? (
+        {agenda.length === 0 ? (
           <p className="text-sm text-muted-foreground">No hay actividades programadas</p>
         ) : (
           <div className="space-y-3">
-            {agenda. map((evento) => (
+            {agenda.map((evento) => (
               <div key={evento.id} className="flex items-center gap-3 rounded-lg border p-3">
                 <div className="flex flex-col items-center">
                   <Clock className="h-4 w-4 text-muted-foreground" />
@@ -324,7 +370,7 @@ function DashboardSkeleton() {
         </div>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        {[... Array(6)].map((_, i) => (
+        {[...Array(6)].map((_, i) => (
           <Card key={i}>
             <CardContent className="p-4">
               <Skeleton className="h-10 w-full" />

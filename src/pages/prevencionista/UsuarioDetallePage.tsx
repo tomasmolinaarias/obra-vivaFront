@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
     Card,
     CardContent,
@@ -24,16 +24,46 @@ import {
     Briefcase,
     LogOut,
     PencilLine,
+    ArrowLeft,
 } from "lucide-react";
 import { tokenStorage } from "@/services/tokenStorage";
 import type { User as AuthUser } from "@/types/auth";
-import { useNavigate } from "react-router-dom";
+
+import type { Trabajador } from "@/types/trabajador";
+import { trabajadoresService } from "@/services/prevencionista/trabajadores.service";
+import { useNavigate, useParams } from "react-router-dom";
 
 export default function UsuarioDetallePage() {
     const navigate = useNavigate();
+    const { rut } = useParams<{ rut: string }>();
     const [authUser] = useState<AuthUser | null>(() => tokenStorage.getUser());
+    const [fetchedWorker, setFetchedWorker] = useState<Trabajador | null>(null);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (rut) {
+            setLoading(true);
+            trabajadoresService.buscarPorRut(rut)
+                .then(w => setFetchedWorker(w))
+                .catch(console.error)
+                .finally(() => setLoading(false));
+        }
+    }, [rut]);
 
     const worker = useMemo(() => {
+        // Mode 1: Fetched worker via RUT (Prevencionista view)
+        if (rut && fetchedWorker) {
+            return {
+                name: `${fetchedWorker.nombres} ${fetchedWorker.apellidos}`,
+                role: fetchedWorker.cargo,
+                company: fetchedWorker.empresa_contratista,
+                status: fetchedWorker.estado,
+                avatar: `${fetchedWorker.nombres.charAt(0)}${fetchedWorker.apellidos.charAt(0)}`,
+                functionName: fetchedWorker.cargo, // reusing cargo
+            };
+        }
+
+        // Mode 2: Logged in user (Colaborador view)
         const defaultInitials = "JP";
         const initialsFromUser = authUser
             ? `${authUser.first_name?.charAt(0) ?? ""}${authUser.last_name?.charAt(0) ?? ""}`.trim()
@@ -63,7 +93,9 @@ export default function UsuarioDetallePage() {
             avatar: safeInitials,
             functionName: functionLabel,
         };
-    }, [authUser]);
+    }, [authUser, fetchedWorker, rut]);
+
+    if (loading) return <div className="p-10 text-center">Cargando reporte...</div>;
 
     const handleLogout = () => {
         tokenStorage.clear();
@@ -119,6 +151,15 @@ export default function UsuarioDetallePage() {
                     </div>
                 </div>
                 <div className="flex flex-wrap items-center justify-end gap-3">
+                    {rut && (
+                        <Button
+                            variant="outline"
+                            onClick={() => navigate("/prevencionista")}
+                            className="flex items-center gap-2 border-slate-300 text-slate-700 hover:bg-slate-50"
+                        >
+                            <ArrowLeft className="h-4 w-4" /> Volver al Dashboard
+                        </Button>
+                    )}
                     <Badge variant="secondary" className="px-3 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200">
                         {worker.status}
                     </Badge>

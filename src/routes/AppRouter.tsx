@@ -59,6 +59,14 @@ export default function AppRouter() {
         }
       />
       <Route
+        path="/prevencionista/trabajador/:rut"
+        element={
+          <ProtectedRoute>
+            <UsuarioDetallePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/prevencionista/ingresos"
         element={
           <ProtectedRoute>
