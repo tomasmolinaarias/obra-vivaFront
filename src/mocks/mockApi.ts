@@ -84,5 +84,13 @@ export async function mockLogin(_email: string, _password: string) {
   return {
     access: "mock-access-token",
     refresh: "mock-refresh-token",
+    user: {
+      id: 1,
+      email: "prevencionista@obraviva.cl",
+      first_name: "Juan",
+      last_name: "Pérez",
+      role: "PREVENCIONISTA",
+      is_staff: false
+    }
   };
 }

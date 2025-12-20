@@ -6,13 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ingresosService } from "@/services/prevencionista/ingresos. service";
+import { ingresosService } from "@/services/prevencionista/ingresos.service";
 import type { IngresoObra, DocumentoIngreso, NotificacionIngreso } from "@/types/trabajador";
-import { 
-  Users, 
-  Clock, 
-  CheckCircle2, 
-  AlertCircle, 
+import {
+  Users,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
   RefreshCw,
   FileText,
   Eye,
@@ -44,7 +44,7 @@ export default function IngresosEnVivo() {
       setIngresosCompletados(completados);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message :  "Error al cargar datos");
+      setError(err instanceof Error ? err.message : "Error al cargar datos");
     } finally {
       setLoading(false);
     }
@@ -58,7 +58,7 @@ export default function IngresosEnVivo() {
       try {
         const updates = await ingresosService.pollActualizaciones(obraId, lastUpdate);
         if (updates.length > 0) {
-          setNotificaciones((prev) => [...updates, ...prev]. slice(0, 10));
+          setNotificaciones((prev) => [...updates, ...prev].slice(0, 10));
           setLastUpdate(new Date().toISOString());
           // Refrescar datos
           fetchData();
@@ -121,7 +121,7 @@ export default function IngresosEnVivo() {
               <CardDescription>Trabajadores completando documentación</CardDescription>
             </CardHeader>
             <CardContent>
-              {ingresosEnProceso. length === 0 ? (
+              {ingresosEnProceso.length === 0 ? (
                 <EmptyState message="No hay ingresos en proceso" />
               ) : (
                 <div className="space-y-3">
@@ -179,8 +179,8 @@ function IngresoCard({
   onSelect: () => void;
   isSelected: boolean;
 }) {
-  const porcentaje = Math.round((ingreso.progreso. firmados / ingreso.progreso.total) * 100);
-  
+  const porcentaje = Math.round((ingreso.progreso.firmados / ingreso.progreso.total) * 100);
+
   const estadoColor = {
     EN_PROCESO: "bg-yellow-100 border-yellow-300",
     COMPLETADO: "bg-green-100 border-green-300",
@@ -190,9 +190,8 @@ function IngresoCard({
   return (
     <div
       onClick={onSelect}
-      className={`cursor-pointer rounded-lg border p-4 transition-all ${
-        isSelected ? "ring-2 ring-blue-500" : ""
-      } ${estadoColor[ingreso.estado]}`}
+      className={`cursor-pointer rounded-lg border p-4 transition-all ${isSelected ? "ring-2 ring-blue-500" : ""
+        } ${estadoColor[ingreso.estado]}`}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -201,7 +200,7 @@ function IngresoCard({
           </div>
           <div>
             <p className="font-semibold">
-              {ingreso.trabajador.nombres} {ingreso.trabajador. apellidos}
+              {ingreso.trabajador.nombres} {ingreso.trabajador.apellidos}
             </p>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Building className="h-3 w-3" />
@@ -220,9 +219,8 @@ function IngresoCard({
       {/* Barra de progreso */}
       <div className="mt-3 h-2 overflow-hidden rounded-full bg-gray-200">
         <div
-          className={`h-full transition-all ${
-            ingreso.progreso. criticos_faltantes > 0 ? "bg-orange-500" : "bg-green-500"
-          }`}
+          className={`h-full transition-all ${ingreso.progreso.criticos_faltantes > 0 ? "bg-orange-500" : "bg-green-500"
+            }`}
           style={{ width: `${porcentaje}%` }}
         />
       </div>
@@ -315,7 +313,7 @@ function DetalleIngresoPanel({ ingreso }: { ingreso: IngresoObra | null }) {
         {/* Checklist de documentos */}
         <h4 className="mb-3 font-semibold">Documentos de Ingreso</h4>
         <div className="space-y-2">
-          {ingreso.documentos. map((doc) => (
+          {ingreso.documentos.map((doc) => (
             <DocumentoRow key={doc.id} documento={doc} />
           ))}
         </div>
@@ -324,7 +322,7 @@ function DetalleIngresoPanel({ ingreso }: { ingreso: IngresoObra | null }) {
   );
 }
 
-function DocumentoRow({ documento }:  { documento: DocumentoIngreso }) {
+function DocumentoRow({ documento }: { documento: DocumentoIngreso }) {
   const semaforo = ingresosService.getEstadoSemaforo(documento.estado);
 
   const semaforoStyles = {
@@ -333,7 +331,7 @@ function DocumentoRow({ documento }:  { documento: DocumentoIngreso }) {
     rojo: "bg-red-500",
   };
 
-  const estadoBadgeVariant:  Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+  const estadoBadgeVariant: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
     FIRMADO: "default",
     PENDIENTE: "secondary",
     FIRMANDO: "outline",
@@ -345,7 +343,7 @@ function DocumentoRow({ documento }:  { documento: DocumentoIngreso }) {
   return (
     <div className="flex items-center gap-3 rounded border p-2">
       {/* Semáforo */}
-      <div className={`h-3 w-3 rounded-full ${semaforoStyles[semaforo]}`} />
+      <div className={`h-3 w-3 rounded-full ${semaforoStyles[semaforo as keyof typeof semaforoStyles]}`} />
 
       {/* Info del documento */}
       <div className="flex-1 min-w-0">
@@ -381,7 +379,7 @@ function DocumentoRow({ documento }:  { documento: DocumentoIngreso }) {
           className="h-8 w-8 p-0"
           title="Reenviar"
           onClick={(e) => {
-            e. stopPropagation();
+            e.stopPropagation();
             // TODO: Implementar reenvío
             console.log("Reenviar documento:", documento.id);
           }}
@@ -393,10 +391,10 @@ function DocumentoRow({ documento }:  { documento: DocumentoIngreso }) {
   );
 }
 
-function NotificacionesBanner({ notificaciones }: { notificaciones:  NotificacionIngreso[] }) {
+function NotificacionesBanner({ notificaciones }: { notificaciones: NotificacionIngreso[] }) {
   const ultimaNotificacion = notificaciones[0];
 
-  if (! ultimaNotificacion) return null;
+  if (!ultimaNotificacion) return null;
 
   const tipoStyles = {
     DOCUMENTO_FIRMADO: "bg-blue-50 border-blue-200 text-blue-800",
@@ -412,9 +410,8 @@ function NotificacionesBanner({ notificaciones }: { notificaciones:  Notificacio
 
   return (
     <div
-      className={`flex items-center gap-3 rounded-lg border p-3 ${
-        tipoStyles[ultimaNotificacion.tipo]
-      }`}
+      className={`flex items-center gap-3 rounded-lg border p-3 ${tipoStyles[ultimaNotificacion.tipo]
+        }`}
     >
       {tipoIcons[ultimaNotificacion.tipo]}
       <div className="flex-1">
@@ -434,7 +431,7 @@ function NotificacionesBanner({ notificaciones }: { notificaciones:  Notificacio
   );
 }
 
-function EmptyState({ message }:  { message: string }) {
+function EmptyState({ message }: { message: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-8 text-center">
       <Users className="h-12 w-12 text-muted-foreground opacity-50" />
@@ -460,7 +457,7 @@ function IngresosSkeleton() {
               <Skeleton className="h-6 w-40" />
             </CardHeader>
             <CardContent className="space-y-3">
-              {[... Array(3)].map((_, i) => (
+              {[...Array(3)].map((_, i) => (
                 <Skeleton key={i} className="h-24 w-full" />
               ))}
             </CardContent>
