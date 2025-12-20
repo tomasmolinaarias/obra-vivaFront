@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
     Card,
     CardContent,
@@ -26,11 +26,7 @@ import { tokenStorage } from "@/services/tokenStorage";
 import type { User as AuthUser } from "@/types/auth";
 
 export default function UsuarioDetallePage() {
-    const [authUser, setAuthUser] = useState<AuthUser | null>(null);
-
-    useEffect(() => {
-        setAuthUser(tokenStorage.getUser());
-    }, []);
+    const [authUser] = useState<AuthUser | null>(() => tokenStorage.getUser());
 
     const worker = useMemo(() => {
         const defaultInitials = "JP";

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { tokenStorage } from "@/services/tokenStorage";
 import type { User } from "@/types/auth";
 import {
@@ -10,12 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 export default function DashboardColaborador() {
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    const storedUser = tokenStorage.getUser();
-    setUser(storedUser);
-  }, []);
+  const [user] = useState<User | null>(() => tokenStorage.getUser());
 
   const handleLogout = () => {
     tokenStorage.clear();
