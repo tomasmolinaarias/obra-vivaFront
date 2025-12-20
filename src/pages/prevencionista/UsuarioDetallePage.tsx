@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from "react";
 import {
     Card,
     CardContent,
@@ -21,16 +22,42 @@ import {
     Calendar,
     PenTool,
 } from "lucide-react";
+import { tokenStorage } from "@/services/tokenStorage";
+import type { User as AuthUser } from "@/types/auth";
 
 export default function UsuarioDetallePage() {
-    // Mock Data based on the sketch
-    const worker = {
-        name: "Juan Pérez González",
-        role: "Maestro Primera",
-        company: "Constructora Las Peñas (Subcontrato)",
-        status: "Permanente",
-        avatar: "JP",
-    };
+    const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+
+    useEffect(() => {
+        setAuthUser(tokenStorage.getUser());
+    }, []);
+
+    const worker = useMemo(() => {
+        const defaultInitials = "JP";
+        const initialsFromUser = authUser
+            ? `${authUser.first_name?.charAt(0) ?? ""}${authUser.last_name?.charAt(0) ?? ""}`.trim()
+            : "";
+
+        const safeInitials = initialsFromUser
+            ? initialsFromUser.toUpperCase()
+            : authUser?.email?.charAt(0).toUpperCase() ?? defaultInitials;
+
+        const fullName = authUser
+            ? `${authUser.first_name ?? ""} ${authUser.last_name ?? ""}`.trim() || authUser.email
+            : "Juan Pérez González";
+
+        const roleLabel = authUser?.role === "COLABORADOR"
+            ? "Colaborador"
+            : authUser?.role ?? "Maestro Primera";
+
+        return {
+            name: fullName,
+            role: roleLabel,
+            company: "Constructora Las Peñas (Subcontrato)",
+            status: authUser ? "Activo" : "Permanente",
+            avatar: safeInitials,
+        };
+    }, [authUser]);
 
     const documentation = [
         { title: "Ficha de Ingreso", status: "completed" },
@@ -56,7 +83,13 @@ export default function UsuarioDetallePage() {
             <div className="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between bg-white p-6 rounded-xl border shadow-sm">
                 <div className="flex items-center gap-4">
                     <div className="h-16 w-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 border-2 border-white shadow-sm">
-                        <User className="h-8 w-8" />
+                        {worker.avatar ? (
+                            <span className="text-xl font-semibold text-slate-600">
+                                {worker.avatar}
+                            </span>
+                        ) : (
+                            <User className="h-8 w-8 text-slate-500" />
+                        )}
                     </div>
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900">{worker.name}</h1>

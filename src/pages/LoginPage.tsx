@@ -30,8 +30,8 @@ async function loginMutation(
 }
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("admin@example.com");
-  const [password, setPassword] = useState("Admin1234");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const { trigger, isMutating } = useSWRMutation(
@@ -52,12 +52,19 @@ export default function LoginPage() {
     setErrorMsg(null);
 
     try {
-      await trigger({
+      const response = await trigger({
         email: email.trim(),
         password,
       });
 
-      window.location.href = "/prevencionista";
+      // Redirigir según el rol del usuario
+      if (response.user.role === 'PREVENCIONISTA') {
+        window.location.href = "/prevencionista";
+      } else if (response.user.role === 'COLABORADOR') {
+        window.location.href = "/usuario";
+      } else {
+        window.location.href = "/";
+      }
     } catch (err: any) {
       const rawMessage =
         typeof err?.message === "string"
@@ -105,7 +112,7 @@ export default function LoginPage() {
                 onChange={(e) =>
                   setEmail(e.target.value)
                 }
-                placeholder="admin@example.com"
+                placeholder="Ingresa tu correo"
                 autoComplete="email"
               />
             </div>
@@ -121,7 +128,7 @@ export default function LoginPage() {
                 onChange={(e) =>
                   setPassword(e.target.value)
                 }
-                placeholder="••••••••"
+                placeholder="Ingresa tu contraseña"
                 autoComplete="current-password"
               />
             </div>
